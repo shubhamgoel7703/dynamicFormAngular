@@ -1,0 +1,223 @@
+<form [formGroup]="formGroup">
+  <!--  -->
+  <div class="row">
+
+    <div class="col-md-12 mt-3" *ngIf="formHeading && formDataList.length>0">
+      <h2 class="heading">{{formHeading}}</h2>
+    </div>
+
+    <ng-container *ngFor="let object of formDataList; let index = index">
+
+      <!-- input tag -->
+      <div *ngIf="object.tag=='input'" class="col-md-{{object.colSize}} form-group">
+        <label>{{object?.label}}</label>
+        <!-- {{object?.throwEvent}} for testing -->
+        <input [type]="object?.type" class="form-control" [formControlName]="object.formControlName" (change)="object?.throwEvent ? formControlChange(object.formControlName) : null"
+          [attr.disabled]="object?.disabled ? 'disabled' : null" [(ngModel)]="formDataList[index].value">
+        <!-- [value]="object?.value || ''" -->
+
+        <div *ngIf="formGroup.controls[object.formControlName].errors && 
+          (formGroup.controls[object.formControlName].dirty || formGroup.controls[object.formControlName].touched)">
+          <span *ngIf="formGroup.controls[object.formControlName].errors.required" class="error">
+            Please enter input</span>
+
+          <span *ngIf="formGroup.controls[object.formControlName].errors.pattern && !formGroup.controls[object.formControlName].errors.required"
+            class="error">
+            Please Enter correct pattern </span>
+        </div>
+
+      </div>
+      <!-- input tag -->
+
+
+
+      <!-- Select tag -->
+      <div *ngIf="object.tag=='select'" class="col-md-{{object.colSize}} form-group">
+        <label>{{object?.label}}</label>
+        <!-- {{object?.throwEvent}} for testing-->
+        <select class="form-control" [formControlName]="object.formControlName" (change)="object?.throwEvent ? formControlChange(object.formControlName) : null"
+          [attr.disabled]="object?.disabled ? 'disabled' : null" [(ngModel)]="object.value">
+          <option value="" selected disabled hidden>Select </option>
+          <option *ngFor="let item of object.itemsArray" [value]='item[object?.optionValueKey] || item'>
+            {{item[object?.optionDescriptionKey] || item}}</option>
+        </select>
+
+        <div *ngIf="formGroup.controls[object.formControlName].errors && 
+        (formGroup.controls[object.formControlName].dirty || formGroup.controls[object.formControlName].touched)">
+          <span *ngIf="formGroup.controls[object.formControlName].errors.required" class="error">
+            Please select input</span>
+        </div>
+
+      </div>
+      <!-- Select tag -->
+
+
+      <!-- date input tag -->
+      <div *ngIf="object.tag=='dateInput'" class="col-md-{{object.colSize}} form-group">
+
+        <label>{{object?.label}}</label>
+        <div class="input-group">
+          <input type="search" class="form-control" [formControlName]="object.formControlName" placeholder="YYYY-MM-DD" name="dp" ngbDatepicker
+            [footerTemplate]="footerTemplate" #d="ngbDatepicker" (dateSelect)="object?.throwEvent ? formControlChange(object.formControlName) : null"
+            (change)="object?.throwEvent ? formControlChange(object.formControlName) : null" [attr.readonly]="object?.disabled ? 'disabled' : null"
+            [(ngModel)]="object.value">
+          <!-- (dateSelect)="getSelectedDate()" (input)='getSelectedDate()' -->
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary" (click)="d.toggle()" type="button" [attr.disabled]="object?.disabled ? 'disabled' : null">
+              <em class="fa fa-calendar-alt"></em>
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="formGroup.controls[object.formControlName].errors && 
+          (formGroup.controls[object.formControlName].dirty || formGroup.controls[object.formControlName].touched)">
+          <span *ngIf="formGroup.controls[object.formControlName].errors.required" class="error">
+            Please select date</span>
+
+          <span *ngIf="formGroup.controls[object.formControlName].errors.ngbDate && !formGroup.controls[object.formControlName].errors.required"
+            class="error">
+            Please Enter correct Date format </span>
+
+          <span *ngIf="formGroup.controls[object.formControlName].errors.invalidFutureDate && !formGroup.controls[object.formControlName].errors.required"
+            class="error">
+            invalid future Date</span>
+        </div>
+      </div>
+      <!-- date input tag -->
+      <!-- .errors.invalidCode -->
+
+
+      <!-- textArea tag -->
+      <div *ngIf="object.tag=='textArea'" class="col-md-{{object.colSize}} form-group">
+
+        <label>{{object?.label}}</label>
+        <textarea [formControlName]="object.formControlName" class="form-control" rows="{{object?.rowSize}}" (change)="object?.throwEvent ? formControlChange(object.formControlName) : null"
+          [attr.disabled]="object?.disabled ? 'disabled' : null" [(ngModel)]="object.value"></textarea>
+
+        <div *ngIf="formGroup.controls[object.formControlName].errors && 
+          (formGroup.controls[object.formControlName].dirty || formGroup.controls[object.formControlName].touched)">
+          <span *ngIf="formGroup.controls[object.formControlName].errors.required" class="error">
+            Please enter input</span>
+        </div>
+
+      </div>
+      <!-- textArea tag -->
+
+
+      <!-- input with text button tag -->
+      <div *ngIf="object.tag=='inputWithButton'" class="col-md-{{object.colSize}} form-group">
+        <label>{{object?.label}}</label>
+        <!-- {{object?.throwEvent}} for testing -->
+        <div class="input-group">
+          <div class="input-group-append">
+            <input type="text" class="form-control" [formControlName]="object.formControlName" [attr.readonly]="object?.disabled ? 'disabled' : null"
+              [(ngModel)]="object.value" (change)="object?.throwEvent ? formControlChange(object.formControlName) : null">
+            <button class="btn btn-outline-primary mr-1" type="button" [attr.disabled]="object?.disabled ? 'disabled' : null" (click)="object?.throwEvent ? formControlChange(object.formControlName) : null">
+              {{object?.buttonText}} </button>
+          </div>
+          <div *ngIf="formGroup.controls[object.formControlName].errors && 
+                (formGroup.controls[object.formControlName].dirty || formGroup.controls[object.formControlName].touched)">
+            <span *ngIf="formGroup.controls[object.formControlName].errors.required" class="error">
+              Please enter input.</span>
+
+            <span *ngIf="formGroup.controls[object.formControlName].errors.pattern" class="error">
+              Please use number only.</span>
+
+            <span *ngIf="formGroup.controls[object.formControlName].errors.invalidCode" class="error">
+              Invalid Code.</span>
+          </div>
+        </div>
+
+      </div>
+      <!-- input with text button tag -->
+
+
+      <!-- input with icon button tag -->
+      <div *ngIf="object.tag=='inputWithIconButton'" class="col-md-{{object.colSize}} form-group">
+        <label>{{object?.label}}</label>
+        <div class="input-group">
+          <input type="text" class="form-control" [formControlName]="object.formControlName" [attr.readonly]="object?.disabled ? 'disabled' : null"
+            [(ngModel)]="object.value">
+          <div class="input-group-append">
+            <button [attr.disabled]="object?.disabled ? 'disabled' : null" class="btn btn-primary uppercase" type="button" (click)="object?.throwEvent ? formControlChange(object.formControlName) : null">
+              <em class="fa fa-search"></em>
+            </button>
+          </div>
+        </div>
+        <div *ngIf="formGroup.controls[object.formControlName].errors && 
+                (formGroup.controls[object.formControlName].dirty || formGroup.controls[object.formControlName].touched)">
+          <span *ngIf="formGroup.controls[object.formControlName].errors.required" class="error">
+            Please enter input</span>
+        </div>
+      </div>
+      <!-- input with icon button tag -->
+
+
+      <!-- Upload document -->
+      <div *ngIf="object.tag=='inputUploadDoc'" class="col-md-{{object.colSize}} form-group">
+        <label>Upload Document</label>
+        <div class="input-group">
+          <div class="custom-file mr-2">
+            <input [type]="object?.type" class="custom-file-input" id="customFile" [formControlName]="object.formControlName" [attr.disabled]="object?.disabled ? 'disabled' : null"
+              (change)="object?.throwEvent ? formControlChange(object.formControlName) : null">
+            <label class="custom-file-label" for="customFile">Choose file</label>
+          </div>
+        </div>
+        <div *ngIf="formGroup.controls[object.formControlName].errors && 
+                (formGroup.controls[object.formControlName].dirty || formGroup.controls[object.formControlName].touched)">
+          <span *ngIf="formGroup.controls[object.formControlName].errors.required" class="error">
+            Please upload the file</span>
+        </div>
+
+      </div>
+      <!-- Upload document -->
+
+
+      <!-- radioSingleLine tag -->
+      <div *ngIf="object.tag=='radioSingleLine'" class="col-md-12">
+        <div class="row">
+          <div class="col-md-6 form-group">
+            <label>{{object?.label}}</label>
+          </div>
+          <div class="col-md-5 form-group">
+            <div class="custom-control custom-radio custom-control-inline" *ngFor="let radioButtonOption of object.radioButtonOptions">
+              <input type="radio" class="custom-control-input" id="{{radioButtonOption?.id}}" name="{{object.formControlName}}" [formControlName]="object.formControlName"
+                (change)="object?.throwEvent ? formControlChange(object.formControlName) : null" [value]='radioButtonOption.label'>
+              <label class="custom-control-label" for="{{radioButtonOption?.id}}">{{radioButtonOption?.label}}</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- radioSingleLine tag -->
+
+
+      <!-- radio tag -->
+      <div *ngIf="object.tag=='radio'" class="col-md-{{object.colSize}} form-group">
+        <label>{{object?.label}}</label>
+        <div>
+
+          <div class="custom-control custom-radio custom-control-inline" *ngFor="let radioButtonOption of object.radioButtonOptions">
+            <input type="radio" class="custom-control-input" id="{{radioButtonOption?.id}}" name="{{object.formControlName}}" [formControlName]="object.formControlName"
+              (change)="object?.throwEvent ? formControlChange(object.formControlName) : null" [value]='radioButtonOption.label'>
+            <label class="custom-control-label" for="{{radioButtonOption?.id}}">{{radioButtonOption.label}}</label>
+          </div>
+
+        </div>
+      </div>
+      <!-- radio tag -->
+
+
+      <!-- button -->
+      <div *ngIf="object.tag=='button'" class="col-md-{{object.colSize}} form-group">
+        <label>{{object?.label}}</label>
+        <button class="btn btn-outline-primary" (click)="object?.throwEvent ? formControlChange(object.formControlName) : null">
+          <em class="fa fa-plus" *ngIf="object?.buttonLogo=='plus'"></em> {{object?.buttonText}}</button>
+      </div>
+      <!-- button -->
+
+
+
+    </ng-container>
+
+  </div>
+</form>
