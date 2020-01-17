@@ -1,9 +1,10 @@
 import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { FormGroup, FormControl, Validators, ValidatorFn } from '@angular/forms';
 import { concatAll } from 'rxjs/operators';
-import * as $ from 'jquery';
+// import * as $ from 'jquery';
 import { Jsonp } from '@angular/http';
 import { SharedService } from '../../services/shared/shared.service';
+import { CreateFormUtilityService } from '../../services/common/create-form-utility.service';
 
 @Component({
   selector: 'app-create-form',
@@ -35,34 +36,46 @@ export class CreateFormComponent implements OnInit, OnChanges {
 
   formGroup: FormGroup;
 
-  constructor(private sharedService: SharedService) { }
+  constructor(private sharedService: SharedService, private createFormUtilityService: CreateFormUtilityService) { }
 
 
   formControlChange(formControlName) {
-    console.log(" changed formControlName is ", formControlName);
-    console.log("Error ", this.formGroup.get(formControlName));
-
-    //  this.subscribeUploadDocEvent();
 
     this.throwEvent.emit([{
       formControlName: formControlName,
       formControlValue: this.formGroup.get(formControlName).value ? this.formGroup.get(formControlName).value : undefined,
       formGroup: this.formGroup
     }])
+
+    try {
+      if (this.formDataList.find(item => item.formControlName == formControlName && item.tag == "inputUploadDoc")) {
+        this.updateUploadDocumnetLabel(formControlName);
+      }
+    }
+    catch (ex) {
+      console.log("exception ", ex)
+    }
+  }
+
+  async updateUploadDocumnetLabel(formControlName) {
+    console.log(this.formGroup.get(formControlName).value)
+    console.log(this.formDataList[1].value);
+
+    this.createFormUtilityService.setValueOfForm(this.formDataList, formControlName, this.formGroup.get(formControlName).value.split("\\").pop());
+
+    console.log(this.formGroup.get(formControlName).value)
+    console.log(this.formDataList[1].value);
   }
 
   subscribeUploadDocEvent() {
-    $(".custom-file-input").on("change", function () {
-      var fileName = $(this).val().split("\\").pop();
-      $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
-      console.log("fileName ", fileName)
-      console.log("check ", $(this).val());
-    });
+    // $(".custom-file-input").on("change", function () {
+    //   var fileName = $(this).val().split("\\").pop();
+    //   $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+    // });
   }
 
 
   resetForm() {
-    console.log("reseting form");
 
     this.formGroup.reset();
 
@@ -72,68 +85,54 @@ export class CreateFormComponent implements OnInit, OnChanges {
       }
     }
 
-    if (this.formDataList.find(item => item.tag == 'inputUploadDoc')) {
-      $(".custom-file-input").siblings(".custom-file-label").addClass("selected").html("Choose File");
-      console.log("upload doc field reset")
+    for (let i = 0; i < this.formDataList.length; i++) {
+      if (this.formDataList[i].tag == 'inputUploadDoc') {
+        //$(".custom-file-input").siblings(".custom-file-label").addClass("selected").html("Choose File");
+        this.createFormUtilityService.setValueOfForm(this.formDataList, this.formDataList[i].formControlName, 'Choose File');
+
+      }
     }
   }
 
   ngOnChanges(changes: SimpleChanges) {
 
-    console.log("changes11111111", changes);
 
     if (this.formGroup != undefined && this.tempValidationFlag != this.checkValidationFlag) {
       this.tempValidationFlag = this.checkValidationFlag;
-      console.log("check validation");
 
       if (this.formGroup.invalid) {
         this.markFormDirty(this.formGroup);
-        console.log('invalid form ', this.formGroup)
-        setTimeout(() => { this.sharedService.showError("invalid " + this.formHeading + " form"); }, 0);
+        setTimeout(() => { this.sharedService.showError("invalid " + (this.formHeading ? this.formHeading : 'submitting') + " form"); }, 0);
       }
       else {
         this.validatedForm.emit(this.formGroup);
 
-        // this.formGroup.get('uploadDocument').setValue('Choose File');
-        console.log('valid form ', this.formGroup)
       }
     }
 
     if (this.formGroup != undefined && this.tempFormDataList != this.formDataList) {
 
-      console.log("form modified");
-      console.log("temp ", this.tempFormDataList);
-      console.log("obj ", this.formDataList)
-      console.log("NE", this.tempFormDataList != this.formDataList)
 
 
       this.updateFormControls();
       this.reassignLastValuesToForm();
 
       this.tempFormDataList = this.formDataList;//Object.assign([{}], this.formDataList);
-      console.log("NE", this.tempFormDataList != this.formDataList)
     }
 
     if (this.formGroup != undefined && this.tempResetFormFlag != this.resetFormFlag) {
       this.resetForm();
       this.tempResetFormFlag = this.resetFormFlag;
     }
-    console.log("ngOnChanges")
   }
 
 
-  // modelChange(event) {
-  //   console.log("event ", event)
-  // }
 
   reassignLastValuesToForm() {
-    console.log("reassigning values");
     for (let i = 0; i < this.tempFormDataList.length; i++) {
       try {
         let item = this.formDataList.find(item => item.formControlName == this.tempFormDataList[i].formControlName);
-        console.log("item ", item);
         if (item) {
-          console.log("current value ", item.value, " last value ", this.formGroup.get(item.formControlName).value);
           item.value = this.formGroup.get(item.formControlName).value;
 
           if (item.tag == "dateInput" && this.formGroup.get(item.formControlName).value && this.formGroup.get(item.formControlName).value.year) {
@@ -151,7 +150,6 @@ export class CreateFormComponent implements OnInit, OnChanges {
         }
       }
       catch (error) {
-        console.error("error ", error);
       }
     }
   }
@@ -176,7 +174,6 @@ export class CreateFormComponent implements OnInit, OnChanges {
       this.formGroup.addControl(formControlName, formControl);
       if (this.formDataList[i]['value']) {
         this.formGroup.get(formControlName).setValue(this.formDataList[i]['value']);
-        console.log("setting value ", this.formDataList[i]['value'])
       }
     }
 
@@ -200,12 +197,8 @@ export class CreateFormComponent implements OnInit, OnChanges {
           this.setAndBindFormValidation(controlName, this.formDataList[formDataListFormControlNames.indexOf(controlName)]['validatorsArray']);
 
         }
-        else
-          console.log("unpredictable");
       }
       else {
-        console.log("control removed ", controlName)
-        console.log(this.formDataList);
         this.formGroup.removeControl(controlName);
       }
     });
@@ -226,19 +219,15 @@ export class CreateFormComponent implements OnInit, OnChanges {
           }
           let formControl = new FormControl(defaultValue, this.formDataList[formDataListFormControlNames.indexOf(formControlName)]['validatorsArray']);
           this.formGroup.addControl(formControlName, formControl);
-          console.log("adding dynamic control ", formControlName);
         }
       }
     }
 
-    else
-      console.log(formDataListFormControlNames, existingFormControls, "should never be nagative ", formDataListFormControlNames.length - existingFormControls.length)
   }
 
 
   setAndBindFormValidation(controlName, validationArray) {
 
-    console.log("setAndBindFormValidation ", controlName, validationArray)
     this.formGroup.get(controlName).setValidators(validationArray);
     this.formGroup.get(controlName).updateValueAndValidity({ emitEvent: false, onlySelf: true });
   }
