@@ -10,7 +10,9 @@
 
       <!-- input tag -->
       <div *ngIf="object.tag=='input'" class="col-md-{{object.colSize}} form-group">
-        <label>{{object?.label}}</label>
+        <label>{{object?.label}}
+          <i *ngIf="object.toolTipData" ngbTooltip="{{object?.toolTipData}}" class="fa fa-question-circle tooltipColor"></i>
+        </label>
         <!-- {{object?.throwEvent}} for testing -->
         <input [type]="object?.type" class="form-control" [formControlName]="object.formControlName" (change)="object?.throwEvent ? formControlChange(object.formControlName) : null"
           [attr.disabled]="object?.disabled ? 'disabled' : null" [(ngModel)]="formDataList[index].value">
@@ -21,9 +23,18 @@
           <span *ngIf="formGroup.controls[object.formControlName].errors.required" class="error">
             Please enter input</span>
 
-          <span *ngIf="formGroup.controls[object.formControlName].errors.pattern && !formGroup.controls[object.formControlName].errors.required"
+          <span *ngIf="formGroup.controls[object.formControlName].errors.invalidPhoneNumber && !formGroup.controls[object.formControlName].errors.required"
             class="error">
-            Please Enter correct pattern </span>
+            Please Enter Valid Phone Number </span>
+
+          <span *ngIf="formGroup.controls[object.formControlName].errors.invalidEmail && !formGroup.controls[object.formControlName].errors.required"
+            class="error">
+            Please Enter Valid Email </span>
+
+          <span *ngIf="formGroup.controls[object.formControlName].errors.minlength && !formGroup.controls[object.formControlName].errors.required && formGroup.controls[object.formControlName].touched"
+            class="error">
+            Please enter minimun length i.e {{formGroup.controls[object.formControlName].errors.minlength.requiredLength}} actual is
+            {{formGroup.controls[object.formControlName].errors.minlength.actualLength}} </span>
         </div>
 
       </div>
@@ -111,7 +122,8 @@
         <div class="input-group">
           <div class="input-group-append">
             <input type="text" class="form-control" [formControlName]="object.formControlName" [attr.readonly]="object?.disabled ? 'disabled' : null"
-              [(ngModel)]="object.value" (change)="object?.throwEvent ? formControlChange(object.formControlName) : null">
+              [(ngModel)]="object.value" placeholder="{{object?.placeholder}}">
+            <!-- (change)="object?.throwEvent ? formControlChange(object.formControlName) : null" -->
             <button class="btn btn-outline-primary mr-1" type="button" [attr.disabled]="object?.disabled ? 'disabled' : null" (click)="object?.throwEvent ? formControlChange(object.formControlName) : null">
               {{object?.buttonText}} </button>
           </div>
@@ -125,6 +137,11 @@
 
             <span *ngIf="formGroup.controls[object.formControlName].errors.invalidCode" class="error">
               Invalid Code.</span>
+
+            <span *ngIf="formGroup.controls[object.formControlName].errors.numberAndCommaOnly && !formGroup.controls[object.formControlName].errors.required"
+              class="error">
+              Please use number and comma only </span>
+
           </div>
         </div>
 
@@ -155,12 +172,17 @@
 
       <!-- Upload document -->
       <div *ngIf="object.tag=='inputUploadDoc'" class="col-md-{{object.colSize}} form-group">
-        <label>Upload Document</label>
+        <label>{{object?.label}}
+          <i *ngIf="object.toolTipData" ngbTooltip="{{object?.toolTipData}}" class="fa fa-question-circle tooltipColor"></i>
+        </label>
         <div class="input-group">
           <div class="custom-file mr-2">
             <input [type]="object?.type" class="custom-file-input" id="customFile" [formControlName]="object.formControlName" [attr.disabled]="object?.disabled ? 'disabled' : null"
-              (change)="object?.throwEvent ? formControlChange(object.formControlName) : null">
-            <label class="custom-file-label" for="customFile">Choose file</label>
+              (change)="object?.throwEvent ? formControlChange(object.formControlName) : updateUploadDocumnetLabel(object.formControlName)"
+              [(ngModel)]="object?.value.toLowerCase() =='choose file' ?'':formGroup.get(object?.formControlName).value">
+            <!-- [(ngModel)]="object?.value.includes('Choose')?'':" -->
+            <label class="custom-file-label" for="customFile">{{object?.value}}</label>
+            <!-- ||formGroup.get(object?.formControlName).value.split("\\").pop()||'Choose File' -->
           </div>
         </div>
         <div *ngIf="formGroup.controls[object.formControlName].errors && 
@@ -208,13 +230,22 @@
 
 
       <!-- button -->
-      <div *ngIf="object.tag=='button'" class="col-md-{{object.colSize}} form-group">
+      <div *ngIf="object.tag=='button'" class="col-md-{{object.colSize}} form-group {{object?.extraClass}}">
         <label>{{object?.label}}</label>
         <button class="btn btn-outline-primary" (click)="object?.throwEvent ? formControlChange(object.formControlName) : null">
           <em class="fa fa-plus" *ngIf="object?.buttonLogo=='plus'"></em> {{object?.buttonText}}</button>
       </div>
       <!-- button -->
 
+
+
+      <!-- Check Box  -->
+      <span *ngIf="object.tag=='checkBox'" class="pl-5 mb-3 custom-checkbox col-md-{{object.colSize}}">
+        <input type="checkbox" class="custom-control-input" id="{{object.id}}" name="{{object.id}}" [formControlName]="object.formControlName"
+          (change)="object?.throwEvent ? formControlChange(object.formControlName) : null">
+        <label class="custom-control-label" for="{{object.id}}">{{object.label}}</label>
+      </span>
+      <!-- Check Box -->
 
 
     </ng-container>
