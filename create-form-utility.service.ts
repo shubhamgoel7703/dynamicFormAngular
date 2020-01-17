@@ -13,7 +13,6 @@ export class CreateFormUtilityService {
 
     // setTimeout(() => { formTags[this.findIndexOfFormControl(formTags, controlName)].value = value; }, 0);
     formTags[this.findIndexOfFormControl(formTags, controlName)].value = value;
-    console.log("setting value to form ", formTags, " control name ", controlName, " value ", value)
   }
 
   setItemsArray(formTags, controlName, itemsArray) {
@@ -28,7 +27,6 @@ export class CreateFormUtilityService {
 
   addControlInForm(formTags, addTagObjectOrList, index): any[] {
     let tempFormTags = this.deepClone(formTags);
-    console.log("check ", addTagObjectOrList);
 
     if (addTagObjectOrList.length) {
       for (let i = 0; i < addTagObjectOrList.length; i++) {
