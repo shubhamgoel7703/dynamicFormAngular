@@ -2,7 +2,7 @@
   <!--  -->
   <div class="row">
 
-    <div class="col-md-12 mt-3" *ngIf="formHeading && formDataList.length>0">
+    <div class="col-md-12 mt-2" *ngIf="formHeading && formDataList.length>0">
       <h2 class="heading">{{formHeading}}</h2>
     </div>
 
@@ -11,6 +11,7 @@
       <!-- input tag -->
       <div *ngIf="object.tag=='input'" class="col-md-{{object.colSize}} form-group">
         <label>{{object?.label}}
+          <font *ngIf="object?.asterisk" color="red">* </font>
           <i *ngIf="object.toolTipData" ngbTooltip="{{object?.toolTipData}}" class="fa fa-question-circle tooltipColor"></i>
         </label>
         <!-- {{object?.throwEvent}} for testing -->
@@ -21,20 +22,40 @@
         <div *ngIf="formGroup.controls[object.formControlName].errors && 
           (formGroup.controls[object.formControlName].dirty || formGroup.controls[object.formControlName].touched)">
           <span *ngIf="formGroup.controls[object.formControlName].errors.required" class="error">
-            Please enter input</span>
+            Please enter {{object?.label}}</span>
 
-          <span *ngIf="formGroup.controls[object.formControlName].errors.invalidPhoneNumber && !formGroup.controls[object.formControlName].errors.required"
+          <span *ngIf="formGroup.controls[object.formControlName].errors?.invalidPhoneNumber && !formGroup.controls[object.formControlName].errors.required"
             class="error">
             Please Enter Valid Phone Number </span>
 
-          <span *ngIf="formGroup.controls[object.formControlName].errors.invalidEmail && !formGroup.controls[object.formControlName].errors.required"
+          <span *ngIf="formGroup.controls[object.formControlName].errors?.pattern && !formGroup.controls[object.formControlName].errors.required"
+            class="error">
+            Invalid Format,
+            <span *ngIf="formGroup.controls[object.formControlName].errors?.pattern?.requiredPattern.includes(constantPatternsStaticObject?.NAME)">
+              only alphabet[A-Z,a-z]
+            </span>
+          </span>
+
+          <!-- {{formGroup.controls[object.formControlName].errors?.pattern?.requiredPattern}} {{constantPatternsStaticObject?.NAME}} -->
+
+          <span *ngIf="formGroup.controls[object.formControlName].errors?.invalidEmail && !formGroup.controls[object.formControlName].errors.required"
             class="error">
             Please Enter Valid Email </span>
 
-          <span *ngIf="formGroup.controls[object.formControlName].errors.minlength && !formGroup.controls[object.formControlName].errors.required && formGroup.controls[object.formControlName].touched"
+          <span *ngIf="formGroup.controls[object.formControlName].errors?.minlength && !formGroup.controls[object.formControlName].errors.required && formGroup.controls[object.formControlName].touched"
             class="error">
-            Please enter minimun length i.e {{formGroup.controls[object.formControlName].errors.minlength.requiredLength}} actual is
-            {{formGroup.controls[object.formControlName].errors.minlength.actualLength}} </span>
+            Minimum length should be {{formGroup.controls[object.formControlName].errors.minlength.requiredLength}}
+          </span>
+
+          <!--  Please enter minimun length i.e {{formGroup.controls[object.formControlName].errors.minlength.requiredLength}} actual is
+            {{formGroup.controls[object.formControlName].errors.minlength.actualLength}}
+           -->
+
+          <span *ngIf="formGroup.controls[object.formControlName].errors?.maxlength && !formGroup.controls[object.formControlName].errors.required && formGroup.controls[object.formControlName].touched"
+            class="error">
+            Please enter maximum length i.e {{formGroup.controls[object.formControlName].errors.maxlength.requiredLength}} actual is
+            {{formGroup.controls[object.formControlName].errors.maxlength.actualLength}} </span>
+
         </div>
 
       </div>
@@ -45,6 +66,8 @@
       <!-- Select tag -->
       <div *ngIf="object.tag=='select'" class="col-md-{{object.colSize}} form-group">
         <label>{{object?.label}}</label>
+        <font *ngIf="object?.asterisk" color="red">* </font>
+
         <!-- {{object?.throwEvent}} for testing-->
         <select class="form-control" [formControlName]="object.formControlName" (change)="object?.throwEvent ? formControlChange(object.formControlName) : null"
           [attr.disabled]="object?.disabled ? 'disabled' : null" [(ngModel)]="object.value">
@@ -56,7 +79,7 @@
         <div *ngIf="formGroup.controls[object.formControlName].errors && 
         (formGroup.controls[object.formControlName].dirty || formGroup.controls[object.formControlName].touched)">
           <span *ngIf="formGroup.controls[object.formControlName].errors.required" class="error">
-            Please select input</span>
+            Please select {{object?.label}}</span>
         </div>
 
       </div>
@@ -67,6 +90,8 @@
       <div *ngIf="object.tag=='dateInput'" class="col-md-{{object.colSize}} form-group">
 
         <label>{{object?.label}}</label>
+        <font *ngIf="object?.asterisk" color="red">* </font>
+
         <div class="input-group">
           <input type="search" class="form-control" [formControlName]="object.formControlName" placeholder="YYYY-MM-DD" name="dp" ngbDatepicker
             [footerTemplate]="footerTemplate" #d="ngbDatepicker" (dateSelect)="object?.throwEvent ? formControlChange(object.formControlName) : null"
@@ -80,18 +105,24 @@
           </div>
         </div>
 
-        <div *ngIf="formGroup.controls[object.formControlName].errors && 
-          (formGroup.controls[object.formControlName].dirty || formGroup.controls[object.formControlName].touched)">
-          <span *ngIf="formGroup.controls[object.formControlName].errors.required" class="error">
+        <div *ngIf="formGroup.controls[object.formControlName]?.errors && 
+          (formGroup.controls[object.formControlName]?.dirty || formGroup.controls[object.formControlName]?.touched)">
+          <span *ngIf="formGroup.controls[object.formControlName]?.errors.required" class="error">
             Please select date</span>
 
-          <span *ngIf="formGroup.controls[object.formControlName].errors.ngbDate && !formGroup.controls[object.formControlName].errors.required"
+          <span *ngIf="formGroup.controls[object.formControlName]?.errors?.ngbDate && !formGroup.controls[object.formControlName]?.errors.required"
             class="error">
             Please Enter correct Date format </span>
 
-          <span *ngIf="formGroup.controls[object.formControlName].errors.invalidFutureDate && !formGroup.controls[object.formControlName].errors.required"
+          <span *ngIf="formGroup.controls[object.formControlName]?.errors?.invalidFutureDate && !formGroup.controls[object.formControlName]?.errors?.required && !formGroup.controls[object.formControlName]?.errors?.ngbDate"
             class="error">
             invalid future Date</span>
+
+          <span *ngIf="formGroup.controls[object.formControlName]?.errors?.invalidMinimum21Age && !formGroup.controls[object.formControlName]?.errors?.required && !formGroup.controls[object.formControlName]?.errors?.ngbDate"
+            class="error">
+            minimum age should be 21</span>
+
+
         </div>
       </div>
       <!-- date input tag -->
@@ -102,6 +133,8 @@
       <div *ngIf="object.tag=='textArea'" class="col-md-{{object.colSize}} form-group">
 
         <label>{{object?.label}}</label>
+        <font *ngIf="object?.asterisk" color="red">* </font>
+
         <textarea [formControlName]="object.formControlName" class="form-control" rows="{{object?.rowSize}}" (change)="object?.throwEvent ? formControlChange(object.formControlName) : null"
           [attr.disabled]="object?.disabled ? 'disabled' : null" [(ngModel)]="object.value"></textarea>
 
@@ -118,6 +151,8 @@
       <!-- input with text button tag -->
       <div *ngIf="object.tag=='inputWithButton'" class="col-md-{{object.colSize}} form-group">
         <label>{{object?.label}}</label>
+        <font *ngIf="object?.asterisk" color="red">* </font>
+
         <!-- {{object?.throwEvent}} for testing -->
         <div class="input-group">
           <div class="input-group-append">
@@ -152,6 +187,8 @@
       <!-- input with icon button tag -->
       <div *ngIf="object.tag=='inputWithIconButton'" class="col-md-{{object.colSize}} form-group">
         <label>{{object?.label}}</label>
+        <font *ngIf="object?.asterisk" color="red">* </font>
+
         <div class="input-group">
           <input type="text" class="form-control" [formControlName]="object.formControlName" [attr.readonly]="object?.disabled ? 'disabled' : null"
             [(ngModel)]="object.value">
@@ -173,13 +210,15 @@
       <!-- Upload document -->
       <div *ngIf="object.tag=='inputUploadDoc'" class="col-md-{{object.colSize}} form-group">
         <label>{{object?.label}}
+          <font *ngIf="object?.asterisk" color="red">* </font>
+
           <i *ngIf="object.toolTipData" ngbTooltip="{{object?.toolTipData}}" class="fa fa-question-circle tooltipColor"></i>
         </label>
         <div class="input-group">
           <div class="custom-file mr-2">
-            <input [type]="object?.type" class="custom-file-input" id="customFile" [formControlName]="object.formControlName" [attr.disabled]="object?.disabled ? 'disabled' : null"
-              (change)="object?.throwEvent ? formControlChange(object.formControlName) : updateUploadDocumnetLabel(object.formControlName)"
-              [(ngModel)]="object?.value.toLowerCase() =='choose file' ?'':formGroup.get(object?.formControlName).value">
+            <input [accept]="object?.accept" [type]="object?.type" class="custom-file-input" id="customFile" [formControlName]="object.formControlName"
+              [attr.disabled]="object?.disabled ? 'disabled' : null" (change)="object?.throwEvent ? formControlChange(object.formControlName,$event) : updateUploadDocumnetLabel(object.formControlName)"
+              [(ngModel)]="object?.value?.toLowerCase() =='choose file' ?'':formGroup.get(object?.formControlName).value">
             <!-- [(ngModel)]="object?.value.includes('Choose')?'':" -->
             <label class="custom-file-label" for="customFile">{{object?.value}}</label>
             <!-- ||formGroup.get(object?.formControlName).value.split("\\").pop()||'Choose File' -->
@@ -200,13 +239,23 @@
         <div class="row">
           <div class="col-md-6 form-group">
             <label>{{object?.label}}</label>
+            <font *ngIf="object?.asterisk" color="red">* </font>
+
           </div>
           <div class="col-md-5 form-group">
             <div class="custom-control custom-radio custom-control-inline" *ngFor="let radioButtonOption of object.radioButtonOptions">
               <input type="radio" class="custom-control-input" id="{{radioButtonOption?.id}}" name="{{object.formControlName}}" [formControlName]="object.formControlName"
-                (change)="object?.throwEvent ? formControlChange(object.formControlName) : null" [value]='radioButtonOption.label'>
+                [(ngModel)]="object.value" (change)="object?.throwEvent ? formControlChange(object.formControlName) : null"
+                [value]='radioButtonOption.label'>
               <label class="custom-control-label" for="{{radioButtonOption?.id}}">{{radioButtonOption?.label}}</label>
             </div>
+
+            <div *ngIf="formGroup.controls[object.formControlName].errors && 
+            (formGroup.controls[object.formControlName].dirty || formGroup.controls[object.formControlName].touched)">
+              <span *ngIf="formGroup.controls[object.formControlName].errors.required" class="error">
+                Please choose </span>
+            </div>
+
           </div>
         </div>
       </div>
@@ -216,15 +265,20 @@
       <!-- radio tag -->
       <div *ngIf="object.tag=='radio'" class="col-md-{{object.colSize}} form-group">
         <label>{{object?.label}}</label>
-        <div>
+        <font *ngIf="object?.asterisk" color="red">* </font>
 
-          <div class="custom-control custom-radio custom-control-inline" *ngFor="let radioButtonOption of object.radioButtonOptions">
-            <input type="radio" class="custom-control-input" id="{{radioButtonOption?.id}}" name="{{object.formControlName}}" [formControlName]="object.formControlName"
-              (change)="object?.throwEvent ? formControlChange(object.formControlName) : null" [value]='radioButtonOption.label'>
-            <label class="custom-control-label" for="{{radioButtonOption?.id}}">{{radioButtonOption.label}}</label>
-          </div>
-
+        <div class="custom-control custom-radio custom-control-inline" *ngFor="let radioButtonOption of object.radioButtonOptions">
+          <input type="radio" class="custom-control-input" id="{{radioButtonOption?.id}}" name="{{object.formControlName}}" [formControlName]="object.formControlName"
+            [(ngModel)]="object.value" (change)="object?.throwEvent ? formControlChange(object.formControlName) : null" [value]='radioButtonOption.label'>
+          <label class="custom-control-label" for="{{radioButtonOption?.id}}">{{radioButtonOption.label}}</label>
         </div>
+
+        <div *ngIf="formGroup.controls[object.formControlName].errors && 
+        (formGroup.controls[object.formControlName].dirty || formGroup.controls[object.formControlName].touched)">
+          <span *ngIf="formGroup.controls[object.formControlName].errors.required" class="error">
+            Please choose </span>
+        </div>
+
       </div>
       <!-- radio tag -->
 
@@ -232,6 +286,7 @@
       <!-- button -->
       <div *ngIf="object.tag=='button'" class="col-md-{{object.colSize}} form-group {{object?.extraClass}}">
         <label>{{object?.label}}</label>
+
         <button class="btn btn-outline-primary" (click)="object?.throwEvent ? formControlChange(object.formControlName) : null">
           <em class="fa fa-plus" *ngIf="object?.buttonLogo=='plus'"></em> {{object?.buttonText}}</button>
       </div>
@@ -242,8 +297,10 @@
       <!-- Check Box  -->
       <span *ngIf="object.tag=='checkBox'" class="pl-5 mb-3 custom-checkbox col-md-{{object.colSize}}">
         <input type="checkbox" class="custom-control-input" id="{{object.id}}" name="{{object.id}}" [formControlName]="object.formControlName"
-          (change)="object?.throwEvent ? formControlChange(object.formControlName) : null">
+          (change)="checkBoxValueChangedEvent(object,$event.target.checked)" [value]="object?.value">
         <label class="custom-control-label" for="{{object.id}}">{{object.label}}</label>
+        <font *ngIf="object?.asterisk" color="red">* </font>
+
       </span>
       <!-- Check Box -->
 
