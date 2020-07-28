@@ -5,6 +5,7 @@ import { concatAll } from 'rxjs/operators';
 import { Jsonp } from '@angular/http';
 import { SharedService } from '../../services/shared/shared.service';
 import { CreateFormUtilityService } from '../../services/common/create-form-utility.service';
+import { PATTER_VALIDATION } from '../../app.constants';
 
 @Component({
   selector: 'app-create-form',
@@ -15,6 +16,8 @@ export class CreateFormComponent implements OnInit, OnChanges {
 
   @Input()
   formHeading;
+  @Input()
+  errorMessage;
   @Input()
   formDataList = [];
   tempFormDataList = [];
@@ -32,18 +35,17 @@ export class CreateFormComponent implements OnInit, OnChanges {
   @Output()
   throwEvent = new EventEmitter();
 
-
+  static constantPatterns = PATTER_VALIDATION;
 
   formGroup: FormGroup;
 
   constructor(private sharedService: SharedService, private createFormUtilityService: CreateFormUtilityService) { }
 
 
-  formControlChange(formControlName) {
-
+  formControlChange(formControlName, optionalFormControlValue?) {
     this.throwEvent.emit([{
       formControlName: formControlName,
-      formControlValue: this.formGroup.get(formControlName).value ? this.formGroup.get(formControlName).value : undefined,
+      formControlValue: optionalFormControlValue ? optionalFormControlValue : this.formGroup.get(formControlName).value ? this.formGroup.get(formControlName).value : undefined,
       formGroup: this.formGroup
     }])
 
@@ -55,6 +57,12 @@ export class CreateFormComponent implements OnInit, OnChanges {
     catch (ex) {
       console.log("exception ", ex)
     }
+  }
+
+  checkBoxValueChangedEvent(object, status) {
+    object.value = status;
+    if (object.throwEvent)
+      this.formControlChange(object.formControlName)
   }
 
   async updateUploadDocumnetLabel(formControlName) {
@@ -101,8 +109,13 @@ export class CreateFormComponent implements OnInit, OnChanges {
       this.tempValidationFlag = this.checkValidationFlag;
 
       if (this.formGroup.invalid) {
+        console.log("this.formGroup. INVALID", this.formGroup);
+        console.log(CreateFormComponent.constantPatterns, PATTER_VALIDATION)
         this.markFormDirty(this.formGroup);
-        setTimeout(() => { this.sharedService.showError("invalid " + (this.formHeading ? this.formHeading : 'submitting') + " form"); }, 0);
+        setTimeout(() => {
+          let errorMessage = this.errorMessage ? this.errorMessage : this.formHeading ? "Invalid " + this.formHeading + " form" : 'Invalid Form';
+          this.sharedService.showError(errorMessage);
+        }, 0);
       }
       else {
         this.validatedForm.emit(this.formGroup);
@@ -111,8 +124,6 @@ export class CreateFormComponent implements OnInit, OnChanges {
     }
 
     if (this.formGroup != undefined && this.tempFormDataList != this.formDataList) {
-
-
 
       this.updateFormControls();
       this.reassignLastValuesToForm();
@@ -147,6 +158,8 @@ export class CreateFormComponent implements OnInit, OnChanges {
             item.value = this.formGroup.get(item.formControlName).value;
           }
 
+          // this.formGroup.get(item.formControlName).markAsPristine();
+
         }
       }
       catch (error) {
@@ -164,6 +177,10 @@ export class CreateFormComponent implements OnInit, OnChanges {
 
     setTimeout(() => { this.subscribeUploadDocEvent(); });
 
+  }
+
+  get constantPatternsStaticObject() {
+    return CreateFormComponent.constantPatterns;
   }
 
   createFormControls() {
