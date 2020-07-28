@@ -15,6 +15,16 @@ export class CreateFormUtilityService {
     formTags[this.findIndexOfFormControl(formTags, controlName)].value = value;
   }
 
+  getValueByFormControlName(formTags, controlName) {
+    for (let i = 0; i < formTags.length; i++) {
+      if (formTags[i].formControlName == controlName) {
+        return formTags[i].value;
+      }
+    }
+
+    return null;
+  }
+
   setItemsArray(formTags, controlName, itemsArray) {
     for (let i = 0; i < formTags.length; i++) {
       if (formTags[i].formControlName == controlName) {
